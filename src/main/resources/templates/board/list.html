@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" layout:decorate="~{layout/layout.html}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+
+<div layout:fragment="content">
+    <div class="card">
+        <!--        검색 : type div / 아래 엑션을 생략하면 자기 자신을 다시 불러-->
+        <form action="/board/list" method="get">
+            <input name="size" th:value="${pageRequestDTO.size}" type="hidden">
+            <div class="col">
+                <div class="input-group mt-3 mb-lg-3"> <!--여백지정-->
+                    <div class="input-group-prepend">
+                        <select class="form-select" name="type">
+                            <option value="">----</option> <!--옵션 아무 선택 안된 것-->
+                            <option th:selected="${pageRequestDTO.type=='t'}" value="t">제목</option>
+                            <!--t라면 true가 리턴되서 선택-->
+                            <option th:selected="${pageRequestDTO.type=='c'}" value="c">내용</option>
+                            <option th:selected="${pageRequestDTO.type=='w'}" value="w">작성자</option>
+                            <option th:selected="${pageRequestDTO.type=='tc'}" value="tc">제목+내용</option>
+                            <option th:selected="${pageRequestDTO.type=='tcw'}" value="tcw">제목+내용+작성자</option>
+                        </select>
+                    </div>
+                    <input type="text" name="keyword" class="input-control" th:value="${pageRequestDTO.keyword}">
+                    <!--검색하고 나서도 선택이 남아-->
+                    <button class="btn btn-secondary searchBtn" type="submit">Search</button>
+                    <button class="btn btn-outline-secondary clearBtn" type="button">Clear</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="card-body">
+            <div class="card-title">게시판 목록보기</div>
+            <table class="table">
+
+                <thead>
+                <tr>
+                    <th scope="col">Bno</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Author</th>
+                    <th scope="col">RegDate</th>
+                    <th scope="col">UpdateDate</th>
+                    <th scope="col">ReadCount</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!--                컨트롤러에 적힌 이름을 쓰면 됨-->
+                <tr th:each="board : ${responseDTO.dtoList}">
+                    <!--                    dto에 적힌 이름대로-->
+                    <th scope="row">[[${board.bno}]]</th>
+                    <td><a th:href="|@{/board/read(bno=${board.bno},mode=1)}&${pageRequestDTO.getLink()}|">[[${board.title}]]</a></td>
+<!--                    중괄호 끝나고 엔드 붙히고 싶으면 파이프라인으로 싸줘야해, 검색어 페이지가 상세보기까지 따라다님-->
+<!--                    pageRequest.getLink() 많이 쓰이면 tbody 같은 곳에 변수선언-->
+                    <!--                    read mode 2, list mode 1-->
+                    <td>[[${board.author}]]</td>
+                    <td th:text="${#temporals.format(board.regDate,'yyyy-MM-dd HH:mm:dd')}"></td>
+                    <td th:text="${#temporals.format(board.updateDate,'yyyy-MM-dd HH:mm:dd')}"></td>
+                    <td>[[${board.readcount}]]</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="float-end">
+                <ul class="pagination">
+                    <li class="page-item" th:if="${responseDTO.prev}">
+                        <a class="page-link" th:data-num="${responseDTO.start -1}">Previous</a>
+                    </li>
+                    <th:block th:each="i:${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                        <li th:class="${responseDTO.page==i}?'page-item active':'page-item'">
+                            <a class="page-link" th:data-num="${i}">[[${i}]]</a>
+                        </li>
+
+                    </th:block>
+                    <li class="page-item" th:if="${responseDTO.next}">
+                        <a class="page-link" th:data-num="${responseDTO.end +1}">Next</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script" th:inline="javascript">
+    document.querySelector(".pagination").addEventListener("click", function (e) {
+        e.preventDefault() // a태그를 하이퍼링크로 안넘어가게 막은 것
+        e.stopPropagation()
+        const target = e.target
+        if (target.tagName !== 'A') { //a태그가 아니면 리턴
+            return
+        }
+        //보드+list+페이지만 했는데 검색어도 추가함. form을 가지고 와서 페이지 따라다님
+        const num = target.getAttribute("data-num")
+        const formObj = document.querySelector("form")
+        formObj.innerHTML+=`<input type='hidden' name='page' value='${num}'>`
+        formObj.submit()
+        // self.location = `/board/list?page=${num}`
+    })
+</script>

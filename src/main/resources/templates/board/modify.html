@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+layout:decorate="~{layout/layout.html}">
+
+<!--레지스터를 복붙함-->
+
+<div layout:fragment="content">
+    <div class="card">
+        <div class="card-body">
+            <div class="card-title">게시판 글 수정하기</div>
+            <form action="/board/modify" method="post">
+<!--                부트스트렙 넣어줌-->
+<!--                추가-->
+                <input type="hidden" name="bno" th:value="${board.bno}">
+
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" name="title" class="form-control" th:value="${board.title}" >
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Content</label>
+                    <textarea name="content" class="form-control" rows="3" placeholder="Content">[[${board.content}]]</textarea>
+                </div>
+<!--                필요없어-->
+<!--                <div class="mb-3">-->
+<!--                    <label class="form-label">Author</label>-->
+<!--                    <input type="text" name="author" class="form-control" placeholder="Author">-->
+<!--                </div>-->
+<!--                부트에서 버튼 가져외-->
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Modify</button>
+<!--                    버튼 누르면 넘어가게 a태그 연결-->
+<!--                    상세페이지, 모디파이 폼가지 검색어가 따라다녀 -> 리스트 눌러도 검색어와 페이징 따라다녀-->
+                    <a th:href="|@{/board/list}?${pageRequestDTO.getLink()}|">
+                    <button type="button" class="btn btn-info">Board List</button>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
